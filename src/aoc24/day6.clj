@@ -16,16 +16,26 @@
 (defn grid-bounds [grid]
   [(count (first grid)) (count grid)])
 
-(defn grid-positions [grid]
+(defn grid-positions
+  "List all the valid [x y] positions on the grid"
+  [grid]
   (let [[x-max y-max] (grid-bounds grid)]
     (for [y (range 0 y-max) x (range 0 x-max)] [x y])))
 
-(defn char-at [grid [x y]]
+(defn char-at
+  "Get the character at a given [x y] position on the grid.
+  If teh supplied [x y] is out of bounds return EXIT to indicate
+  the guard has moved out of the mapped area"
+  [grid [x y]]
   (try
     (nth (nth grid y) x)
     (catch Exception _ EXIT)))
 
-(defn add-obstacle [obstacle-pos]
+(defn add-obstacle
+  "Creates a function that returns the character at a given [x y]
+  position but if that position is the same as obstacle-position
+  will return OBSTACLE instead of what is represented in the grid"
+  [obstacle-pos]
   (fn [grid pos]
     (if (= pos obstacle-pos)
       OBSTACLE
@@ -41,7 +51,11 @@
         (= direction DOWN) LEFT
         (= direction LEFT) UP))
 
-(defn stepper [grid char-getter]
+(defn stepper
+  "Creates a function that will move the guard to its next position
+  in the given grid. char-getter is used to resolve the character at the
+  position the guard will try to move into"
+  [grid char-getter]
   (fn step [[[x y] [dx dy]]]
     (let [next-pos [(+ x dx) (+ y dy)]
           next-square (char-getter grid next-pos)]
@@ -50,7 +64,10 @@
             (= next-square OBSTACLE) [[x y] (turn [dx dy])]
             (= next-square EXIT) :done))))
 
-(defn simple-path [grid char-getter]
+(defn simple-path
+  "Generates a path through the grid ending when the path leaves the bounds
+  of the grid. Won't terminate if there is a loop in the path."
+  [grid char-getter]
   (let [start (find-start grid)
         stepper-fn (stepper grid char-getter)
         results (take-while #(not= :done %) (iterate stepper-fn [start UP]))]
@@ -60,7 +77,12 @@
   (let [path (map first (simple-path grid char-at))]
     (count (apply hash-set path))))
 
-(defn loop-finder [trodden next-step]
+(defn loop-finder
+  "Used as a reducer. Given a lazy path this will detect if an [x y] position
+  has been passed through before when heading in the same direction. If this
+  happens we have a loop and the reduce will end with :loop.  If the path
+  leaves the bounds of the grid the reduce will end with :done"
+  [trodden next-step]
   (cond (= :done next-step) (reduced :done)
         :else (let [[pos dir] next-step]
                 (if (contains? trodden [pos dir])
