@@ -27,7 +27,7 @@
 (defn char-at [grid [x y]]
   (try
     (nth (nth grid y) x)
-    (catch Exception e ".")))
+    (catch Exception _ ".")))
 
 (defn word-on-line [grid line]
   (apply str (map #(char-at grid %) line)))

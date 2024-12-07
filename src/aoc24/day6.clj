@@ -23,7 +23,7 @@
 (defn char-at [grid [x y]]
   (try
     (nth (nth grid y) x)
-    (catch Exception e EXIT)))
+    (catch Exception _ EXIT)))
 
 (defn find-start [grid]
   (let [positions (grid-positions grid)]
