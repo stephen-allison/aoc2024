@@ -64,9 +64,11 @@
             (= next-square OBSTACLE) [[x y] (turn [dx dy])]
             (= next-square EXIT) :done))))
 
-(defn simple-path
+(defn path-of-guard
   "Generates a path through the grid ending when the path leaves the bounds
-  of the grid. Won't terminate if there is a loop in the path."
+  of the grid. Won't terminate if there is a loop in the path. Results are a sequence
+  of [x y] [dx dy] where [x y] is a position in the grid and [dx dy] is the direction
+  of travel (see UP DOWN etc above)."
   [grid char-getter]
   (let [start (find-start grid)
         stepper-fn (stepper grid char-getter)
@@ -74,7 +76,7 @@
     results))
 
 (defn part-one [grid]
-  (let [path (map first (simple-path grid char-at))]
+  (let [path (map first (path-of-guard grid char-at))]
     (count (apply hash-set path))))
 
 (defn loop-finder
@@ -89,10 +91,16 @@
                   (reduced :loop)
                   (conj trodden [pos dir])))))
 
-(defn part-two [grid]
-  (let [path (map first (simple-path grid char-at))
+(defn part-two
+  "First, calculate the guard's path in the unchanged grid since only these locations
+  are interesting candidates for adding obstacles. For each of these locations we
+  create an obstacle function that will feed OBSTACLE to the path navigation routine
+  at the appropriate point.  We run this for every possible OBSTACLE location and count
+  how many of the paths are loops."
+  [grid]
+  (let [path (map first (path-of-guard grid char-at))
         obstacle-fns (map add-obstacle (apply hash-set path))
-        obstructed-paths (map #(simple-path grid %) obstacle-fns)]
+        obstructed-paths (map #(path-of-guard grid %) obstacle-fns)]
     (count (filter #(= :loop %) (map #(reduce loop-finder #{} %) obstructed-paths)))))
 
 (defn solve []
