@@ -114,6 +114,7 @@
     (count (filter #(= :loop %) (map #(reduce loop-finder #{} %) obstructed-paths)))))
 
 (defn solve []
+  (println "Day Six")
   (let [grid (grid-map (load-map))]
     (println (part-one grid))
     (println (part-two grid))))

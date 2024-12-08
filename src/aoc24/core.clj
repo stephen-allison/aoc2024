@@ -5,6 +5,7 @@
 (require '[aoc24.day4 :as day4])
 (require '[aoc24.day5 :as day5])
 (require '[aoc24.day6 :as day6])
+(require '[aoc24.day7 :as day7])
 
 (defn -main [& _]
   "Advent of Code 2024"
@@ -14,4 +15,5 @@
   (day3/solve)
   (day4/solve)
   (day5/solve)
-  (day6/solve))
+  (day6/solve)
+  (day7/solve))

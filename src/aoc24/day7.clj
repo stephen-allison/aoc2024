@@ -29,22 +29,23 @@
   "Makes a function that uses passed fns to generate all the possible
   results for a given equation input and then returns a list of those
   equations where it was possible to reach the target value."
-  [fns]
+  [stepper]
   (fn [eqn]
     (let [target (first eqn)
           vals (rest eqn)
-          step (make-stepper fns)
-          possible (reduce step [(first vals)] (rest vals))
+          possible (reduce stepper [(first vals)] (rest vals))
           results (some #(when (= target %) target) possible)]
       results)))
 
 (defn solve-for-operators [eqns ops]
-  (let [checker (make-checker ops)
+  (let [stepper (make-stepper ops)
+        checker (make-checker stepper)
         results (map checker eqns)
         ok (filter some? results)]
     (reduce + ok)))
 
 (defn solve []
+  (println "Day Seven")
   (let [eqns (equation-data)
         part-one (solve-for-operators eqns [+ *])
         part-two (solve-for-operators eqns [+ * concat-numbers])]
