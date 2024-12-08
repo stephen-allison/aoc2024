@@ -29,19 +29,30 @@
     (nth (nth grid y) x)
     (catch Exception _ ".")))
 
-(defn word-on-line [grid line]
+(defn word-on-line
+  "Given a line of [x y] positions work out the corresponding word on the grid."
+  [grid line]
   (apply str (map #(char-at grid %) line)))
 
-(defn line-from [[x y] [dx dy]]
+(defn line-from
+  "Given a starting [x y] position, work out all the other positions
+  that form a valid line of WORD-LEN (i.e. 4) spaces in the given [dx dy] direction."
+  [[x y] [dx dy]]
   (for [n (range 0 WORD-LEN)] [(+ x (* dx n)) (+ y (* dy n))]))
 
-(defn lines-from [pos]
+(defn lines-from
+  "Work out all the possible lines from the given position pos."
+  [pos]
   (map #(line-from pos %) DIRECTIONS))
 
-(defn all-lines [grid]
+(defn all-lines
+  "Work out all the possible lines to search on the grid."
+  [grid]
   (mapcat lines-from (grid-positions grid)))
 
-(defn all-words [grid]
+(defn all-words
+  "Find all the words under all the possible lines on the grid."
+  [grid]
   (map #(word-on-line grid %) (all-lines grid)))
 
 (defn cross-at [[x y]]

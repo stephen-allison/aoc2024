@@ -24,12 +24,19 @@
 
 (defn char-at
   "Get the character at a given [x y] position on the grid.
-  If teh supplied [x y] is out of bounds return EXIT to indicate
-  the guard has moved out of the mapped area"
+  If the supplied [x y] is out of bounds return EXIT to indicate
+  the guard has moved out of the mapped area.
+  Probably would be much better to represent the grid as a map
+  instead as this is probably pretty slow."
   [grid [x y]]
-  (try
-    (nth (nth grid y) x)
-    (catch Exception _ EXIT)))
+  (get grid [x y] EXIT))
+
+
+(defn grid-map [grid]
+  (let [get-char (fn [grid [x y]] (nth (nth grid y) x))
+        positions (grid-positions grid)
+        chars (for [pos positions] [pos (get-char grid pos)])]
+    (into (hash-map) chars)))
 
 (defn add-obstacle
   "Creates a function that returns the character at a given [x y]
@@ -41,9 +48,12 @@
       OBSTACLE
       (char-at grid pos))))
 
-(defn find-start [grid]
+(defn x-find-start [grid]
   (let [positions (grid-positions grid)]
     (some #(when (= START (char-at grid %)) %) positions)))
+
+(defn find-start [grid]
+    (some (fn [[k v]] (when (= v START) k)) grid))
 
 (defn turn [direction]
   (cond (= direction UP) RIGHT
@@ -104,6 +114,6 @@
     (count (filter #(= :loop %) (map #(reduce loop-finder #{} %) obstructed-paths)))))
 
 (defn solve []
-  (let [grid (load-map)]
+  (let [grid (grid-map (load-map))]
     (println (part-one grid))
     (println (part-two grid))))
