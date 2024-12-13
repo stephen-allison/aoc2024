@@ -86,6 +86,6 @@
 
 (defn solve []
   (let [grid (loader/puzzle-input-lines "day4.txt")]
-    (println "Day Three")
+    (println "Day Four")
     (println (part-one grid))
     (println (part-two grid))))
