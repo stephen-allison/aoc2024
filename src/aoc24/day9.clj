@@ -1,5 +1,4 @@
 (ns aoc24.day9
-  (:require [aoc24.loader :as loader])
   (:require [clojure.edn :as edn]))
 
 ;
@@ -8,19 +7,17 @@
 ; output: map of files {positon: file-id}
 ;         list of free spaces [a b c]
 ;
-(defn scan-data
-  ([]
-   {:file-positions  (sorted-map)
-    :free-positions  []
-    :current-index   0
-    :current-file-id 0})
-  )
+(defn new-scan
+  {:file-positions  (sorted-map)
+   :free-positions  []
+   :current-index   0
+   :current-file-id 0}
 
-(defn update-scan-files [res updated n]
-  {:file-positions  updated
-   :free-positions  (:free-positions res)
-   :current-index   (+ (:current-index res) n)
-   :current-file-id (inc (:current-file-id res))})
+  (defn update-scan-files [res updated n]
+    {:file-positions  updated
+     :free-positions  (:free-positions res)
+     :current-index   (+ (:current-index res) n)
+     :current-file-id (inc (:current-file-id res))}))
 
 (defn update-scan-free [res updated n]
   {:file-positions  (:file-positions res)
@@ -28,7 +25,7 @@
    :current-index   (+ (:current-index res) n)
    :current-file-id (:current-file-id res)})
 
-(defn update-file-positions [res input-idx ch]
+(defn update-file-positions [res ch]
   (let [file-positions (:file-positions res)
         file-id (:current-file-id res)
         n (edn/read-string (str ch))
@@ -36,7 +33,7 @@
         updated (into file-positions (map vector (range output-idx (+ output-idx n)) (repeat n file-id)))]
     (update-scan-files res updated n)))
 
-(defn update-free [res idx ch]
+(defn update-free [res ch]
   (let [free-positions (:free-positions res)
         n (edn/read-string (str ch))
         output-idx (:current-index res)
@@ -45,11 +42,11 @@
 
 (defn scan [res [index char]]
   (if (even? index)
-    (update-file-positions res index char)
-    (update-free res index char)))
+    (update-file-positions res char)
+    (update-free res char)))
 
 (defn expand-diskmap [diskmap]
-  (reduce scan (scan-data) (map-indexed vector diskmap)))
+  (reduce scan (new-scan) (map-indexed vector diskmap)))
 
 (defn move
   ([mapping from-index to-index]
@@ -72,5 +69,4 @@
   (->> diskmap
        expand-diskmap
        compress
-       checksum
-       ))
+       checksum))
