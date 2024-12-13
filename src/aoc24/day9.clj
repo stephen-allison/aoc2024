@@ -25,25 +25,38 @@
    :current-index   (+ (:current-index res) n)
    :current-file-id (:current-file-id res)})
 
-(defn update-file-positions [res ch]
+(defn part-one-file-updater [file-positions output-idx file-size file-id]
+  (into file-positions
+        (map vector (range output-idx (+ output-idx file-size))
+                    (repeat file-size file-id))))
+
+(defn part-two-file-updater [file-positions output-idx, file-size, file-id]
+  (assoc file-positions output-idx (vector (repeat file-size file-id))))
+
+(defn update-file-positions [update-fn res ch]
   (let [{file-positions :file-positions
          file-id :current-file-id
          output-idx :current-index} res
-        n (edn/read-string (str ch))
-        updated (into file-positions (map vector (range output-idx (+ output-idx n)) (repeat n file-id)))]
+         n (edn/read-string (str ch))
+        updated (update-fn file-positions output-idx n, file-id)]
     (update-scan-files res updated n)))
 
-(defn update-free [res ch]
+(defn part-one-free-updater [free-positions output-idx free-size]
+  (into free-positions
+        (map vector (range output-idx (+ output-idx free-size))
+             (repeat free-size \.))))
+
+(defn update-free [update-fn res ch]
   (let [{free-positions :free-positions
          output-idx :current-index} res
         n (edn/read-string (str ch))
-        updated (into free-positions (map vector (range output-idx (+ output-idx n)) (repeat n \.)))]
+        updated (update-fn free-positions output-idx n)]
     (update-scan-free res updated n)))
 
 (defn scan [res [index char]]
   (if (even? index)
-    (update-file-positions res char)
-    (update-free res char)))
+    (update-file-positions part-one-file-updater res char)
+    (update-free part-one-free-updater res char)))
 
 (defn expand-diskmap [diskmap]
   (reduce scan (new-scan) (map-indexed vector diskmap)))
